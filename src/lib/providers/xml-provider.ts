@@ -4,7 +4,7 @@ import { BaseProvider, ConvertParams } from "./base-provider";
 import { ConversionType } from "../types/conversion-types";
 
 export class XmlProvider extends BaseProvider {
-  convert({ document,  convertType }: ConvertParams): string {
+  convert({ document, convertType }: ConvertParams): string {
     if (convertType === ConversionType.JSON) {
       return json2xml(document, { compact: true, spaces: 4 });
     }
@@ -18,7 +18,7 @@ export class XmlProvider extends BaseProvider {
     throw new Error("Method not implemented.");
   }
 
-  validate(document: string): boolean {
+  protected validate(document: string): boolean {
     if (!document || document.trim().length === 0) {
       return false;
     }

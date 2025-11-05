@@ -3,42 +3,50 @@ import { ConversionType } from "../../../src/lib/types/conversion-types";
 import { StringProvider } from "../../../src/lib/providers/string-provider";
 import { JsonProvider } from "../../../src/lib/providers/json-provider";
 import { XmlProvider } from "../../../src/lib/providers/xml-provider";
+import { BaseProvider } from "../../../src/lib/providers/base-provider";
+
+const providerMap: Record<ConversionType, new () => BaseProvider> = {
+  [ConversionType.STRING]: StringProvider,
+  [ConversionType.JSON]: JsonProvider,
+  [ConversionType.XML]: XmlProvider,
+};
+
+function getProvider(fromFormat: ConversionType): BaseProvider | undefined {
+  const ProviderClass = providerMap[fromFormat];
+  return ProviderClass ? new ProviderClass() : undefined;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  if (
-    body.toFormat === ConversionType.STRING ||
-    body.fromFormat === ConversionType.STRING
-  ) {
-    const stringProvider = new StringProvider();
+  try {
+    const provider = getProvider(body.fromFormat);
+    
+    if (!provider) {
+      return NextResponse.json(
+        { error: "Invalid fromFormat" },
+        { status: 400 }
+      );
+    }
 
-    const parsed = stringProvider.parse(body.document);
+    if (!provider.validate(body.document)) {
+      return NextResponse.json(
+        { error: "Invalid document format" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ data: parsed });
+    const result = provider.convert({
+      document: body.document,
+      originalType: body.fromFormat,
+      convertType: body.toFormat,
+    });
+
+    return NextResponse.json({ data: result, format: body.toFormat });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Conversion failed" },
+      { status: 500 }
+    );
   }
-
-  if (
-    body.toFormat === ConversionType.JSON ||
-    body.fromFormat === ConversionType.JSON
-  ) {
-    const stringProvider = new JsonProvider();
-
-    const parsed = stringProvider.parse(body.document);
-
-    return NextResponse.json({ data: parsed });
-  }
-  
-  if (
-    body.toFormat === ConversionType.XML ||
-    body.fromFormat === ConversionType.XML
-  ) {
-    const stringProvider = new XmlProvider();
-
-    const parsed = stringProvider.parse(body.document);
-
-    return NextResponse.json({ data: parsed });
-  }
-
-  return NextResponse.json({ data: body, type: "Bryce" });
 }

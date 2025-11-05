@@ -3,8 +3,7 @@ import { ConversionType } from "../types/conversion-types";
 import { BaseProvider, ConvertParams } from "./base-provider";
 
 export class StringProvider extends BaseProvider {
-
-  convert({ document,  convertType }: ConvertParams): string {
+  convert({ document, convertType }: ConvertParams): string {
     if (convertType === ConversionType.JSON) {
       return json2xml(document, { compact: true, spaces: 4 });
     }
@@ -12,7 +11,7 @@ export class StringProvider extends BaseProvider {
       return "JSON TO STRING";
     }
 
-    throw Error("Invalid conversion type for XmlProvider");
+    throw Error("Invalid conversion type for StringProvider");
   }
 
   parse(document: string): boolean {
