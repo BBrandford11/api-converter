@@ -7,7 +7,6 @@ convertType: ConversionType
 }
 
 export abstract class BaseProvider {
-  abstract parse(document: string): boolean;
-  abstract validate(document: string): boolean;
-  abstract convert(input:ConvertParams): string;
+  abstract validate(document: string): string[];
+  abstract convert(input: ConvertParams): string;
 }

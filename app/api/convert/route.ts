@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConversionType } from "../../../src/lib/types/conversion-types";
 import { StringProvider } from "../../../src/lib/providers/string-provider";
 import { JsonProvider } from "../../../src/lib/providers/json-provider";
-import { BaseProvider } from "../../../src/lib/providers/base-provider";
 import { XmlProvider } from "../../../src/lib/providers/xml-provider";
+import { BaseProvider } from "../../../src/lib/providers/base-provider";
 
 const providerMap: Record<ConversionType, new () => BaseProvider> = {
   [ConversionType.STRING]: StringProvider,
@@ -21,10 +21,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const provider = getProvider(body.fromFormat);
-
+    
     if (!provider) {
       return NextResponse.json(
         { error: "Invalid fromFormat" },
+        { status: 400 }
+      );
+    }
+
+    if (!provider.validate(body.document)) {
+      return NextResponse.json(
+        { error: "Invalid document format" },
         { status: 400 }
       );
     }
@@ -37,10 +44,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: result, format: body.toFormat });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Conversion failed";
-    const statusCode = errorMessage.includes("Invalid") ? 400 : 500;
-
-    return NextResponse.json({ error: errorMessage }, { status: statusCode });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Conversion failed" },
+      { status: 500 }
+    );
   }
 }

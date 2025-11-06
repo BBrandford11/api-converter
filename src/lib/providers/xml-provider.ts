@@ -18,10 +18,23 @@ export class XmlProvider extends BaseProvider {
     throw new Error("Method not implemented.");
   }
 
-  protected validate(document: string): boolean {
+  validate(document: string): boolean {
     if (!document || document.trim().length === 0) {
       return false;
     }
+
+    const trimmed = document.trim();
+    
+    // Must start with < or <?xml
+    if (!trimmed.startsWith('<')) {
+      return false;
+    }
+
+    // Basic check: must have a root element
+    if (!trimmed.includes('<root>') && !trimmed.match(/<[a-zA-Z][\w-]*>/)) {
+      return false;
+    }
+
     return true;
   }
 }

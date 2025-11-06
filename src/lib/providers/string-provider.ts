@@ -21,30 +21,30 @@ export class StringProvider extends BaseProvider {
     const trimmedDocument = document.trim();
 
     if (!document || trimmedDocument.length === 0) {
-      throw new Error("Document is empty");
+      throw new Error(`Document is empty`);
     }
 
     const segments = trimmedDocument
-      .split("~")
+      .split(`~`)
       .filter((string) => string.trim().length > 0);
 
     if (segments.length === 0) {
       throw new Error(
-        "No segments found. Document must contain at least one segment separated by '~'"
+        `No segments found. Document must contain at least one segment separated by '~'`
       );
     }
 
     for (const segment of segments) {
-      const parts = segment.split("*");
+      const parts = segment.split(`*`);
       if (parts.length < 2) {
         throw new Error(
-          `Invalid segment format: "${segment}". Each segment must have a segment name and at least one element separated by '*'`
+          `Invalid segment format: ${segment}. Each segment must have a segment name and at least one element separated by '*'`
         );
       }
 
       if (!parts[0] || parts[0].length === 0) {
         throw new Error(
-          `Invalid segment: "${segment}". Segment name cannot be empty`
+          `Invalid segment: ${segment}. Segment name cannot be empty`
         );
       }
     }
@@ -53,12 +53,18 @@ export class StringProvider extends BaseProvider {
   }
 
   private convertToStringToXml(segments: string[]): string {
-    const xmlHeader = `<?xml version="1.0" encoding="UTF-8" ?>
-    `;
-    const result: Record<string, any[]> = {};
+    let xml = `<?xml version="1.0" encoding="UTF-8" ?>\n`;
+
+    xml += `<root>\n`;
 
     for (const segment of segments) {
-      const parts = segment.split("*");
+      const trimmedSegment = segment.trim();
+
+      const parts = trimmedSegment
+        .split(`*`)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+
       if (parts.length < 2) {
         continue;
       }
@@ -66,26 +72,29 @@ export class StringProvider extends BaseProvider {
       const segmentName = parts[0];
       const elements = parts.slice(1);
 
-      if (!result[segmentName]) {
-        result[segmentName] = [];
-      }
+      xml += `  <${segmentName}>\n`;
 
-      const jsonObject: Record<string, string> = {};
       elements.forEach((element, index) => {
-        jsonObject[`${segmentName}${index + 1}`] = element;
+        const elementTagName = `${segmentName}${index + 1}`;
+        xml += `    <${elementTagName}>${element}</${elementTagName}>\n`;
       });
 
-      result[segmentName].push(jsonObject);
+      xml += `  </${segmentName}>\n`;
     }
 
-    return JSON.stringify(result);
+    xml += `</root>`;
+    return xml;
   }
 
   private convertToStringToJson(segments: string[]): string {
     const result: Record<string, any[]> = {};
 
     for (const segment of segments) {
-      const parts = segment.split("*");
+      const trimmedSegment = segment.trim();
+      const parts = trimmedSegment
+        .split(`*`)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
       if (parts.length < 2) {
         continue;
       }

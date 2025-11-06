@@ -14,14 +14,22 @@ export class JsonProvider extends BaseProvider {
 
     throw Error("Invalid conversion type for JsonProvider");
   }
-  parse(document: string): boolean {
-    throw new Error("Method not implemented.");
-  }
 
-  validate(document: string): boolean {
+  validate(document: string): string[] {
     if (!document || document.trim().length === 0) {
-      return false;
+      throw new Error("Invalid JSON format");
     }
-    return true;
+
+    const parsed = JSON.parse(document);
+
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      throw new Error("Invalid JSON format");
+    }
+
+    return Object.keys(parsed);
   }
 }
