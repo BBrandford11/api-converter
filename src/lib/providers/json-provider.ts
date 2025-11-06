@@ -1,12 +1,14 @@
-import { xml2json } from "xml-js";
-
+import { json2xml } from "xml-js";
 import { ConversionType } from "../types/conversion-types";
 import { BaseProvider, ConvertParams } from "./base-provider";
 
 export class JsonProvider extends BaseProvider {
   convert({ document, convertType }: ConvertParams): string {
+    this.validate(document);
+
+
     if (convertType === ConversionType.XML) {
-      return xml2json(document, { compact: true, spaces: 4 });
+      return json2xml(document, {compact: true, ignoreComment: true, spaces: 4});
     }
     if (convertType === ConversionType.STRING) {
       return this.convertJsonToString(document);
@@ -19,7 +21,6 @@ export class JsonProvider extends BaseProvider {
     const parsed = JSON.parse(document);
     const segments: string[] = [];
 
-    // Iterate over each segment name (e.g., "ProductID", "AddressID")
     for (const segmentName of Object.keys(parsed)) {
       const segmentArray = parsed[segmentName];
 
@@ -27,9 +28,7 @@ export class JsonProvider extends BaseProvider {
         continue;
       }
 
-      // For each object in the segment array
       for (const segmentObject of segmentArray) {
-        // Extract and sort keys by their numeric suffix (ProductID1, ProductID2, etc.)
         const keys = Object.keys(segmentObject)
           .filter((key) => key.startsWith(segmentName))
           .sort((a, b) => {
@@ -38,7 +37,6 @@ export class JsonProvider extends BaseProvider {
             return numA - numB;
           });
 
-        // Build the segment string: SegmentName*value1*value2*value3~
         const values = keys.map((key) => segmentObject[key]);
         const segmentString = `${segmentName}*${values.join("*")}~`;
         segments.push(segmentString);

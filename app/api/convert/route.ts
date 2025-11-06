@@ -21,17 +21,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const provider = getProvider(body.fromFormat);
-    
+
     if (!provider) {
       return NextResponse.json(
         { error: "Invalid fromFormat" },
-        { status: 400 }
-      );
-    }
-
-    if (!provider.validate(body.document)) {
-      return NextResponse.json(
-        { error: "Invalid document format" },
         { status: 400 }
       );
     }
@@ -41,6 +34,7 @@ export async function POST(request: NextRequest) {
       originalType: body.fromFormat,
       convertType: body.toFormat,
     });
+
 
     return NextResponse.json({ data: result, format: body.toFormat });
   } catch (error) {
