@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Document Converter API
 
-## Getting Started
+API to convert documents between three formats: **String**, **JSON**, and **XML**.
 
-First, run the development server:
+![string to xml](image.png)
+![string to xml](image-1.png)
+![string to json terminal](image-2.png)
+
+Areas I would improve if I had unlimited time. 
+1. I like the idea of the provider structure I created but If we wanted to create multiple different converter providers each converter needs its own logic for the change. On the fence as it makes sense that we would want individual logic we could change individually but I think there is room for a central orchestrator to deal with the communication between providers better.
+2. Obviously re-write the front end components as I quickly used cursor to create the front end for testing and display purposes and not production ready
+3. Expand testing coverage to other providers
+4. Work on a dependency registry or singleton injection instead of creating a new class in the route/providers.
+5. Create a repository layer in the src/repository folder to store request/response and any metadata on the request for billing purpose's 
+
+
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Option 1: Web Interface
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Run `npm run dev`
+2. Open `http://localhost:3000` in your browser
+3. Paste your document and select the formats to convert between
 
-## Learn More
+### Option 2: API Endpoint
 
-To learn more about Next.js, take a look at the following resources:
+Send a POST request to `/api/convert`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+curl -X POST http://localhost:3000/api/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": "ProductID*4*8*15*16*23~ProductID*a*b*c*d*e~AddressID*42*108*3*14~ContactID*59*26~",
+    "fromFormat": "STRING",
+    "toFormat": "JSON"
+  }'
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Request:**
+- `document`: The document to convert (string)
+- `fromFormat`: Source format (`STRING`, `JSON`, or `XML`)
+- `toFormat`: Target format (`STRING`, `JSON`, or `XML`)
 
-## Deploy on Vercel
+## Example Documents
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**String:**
+```
+ProductID*4*8*15*16*23~ProductID*a*b*c*d*e~AddressID*42*108*3*14~ContactID*59*26~
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**JSON:**
+```json
+{
+  "ProductID": [
+    {"ProductID1": "4", "ProductID2": "8", "ProductID3": "15", "ProductID4": "16", "ProductID5": "23"},
+    {"ProductID1": "a", "ProductID2": "b", "ProductID3": "c", "ProductID4": "d", "ProductID5": "e"}
+  ],
+  "AddressID": [{"AddressID1": "42", "AddressID2": "108", "AddressID3": "3", "AddressID4": "14"}],
+  "ContactID": [{"ContactID1": "59", "ContactID2": "26"}]
+}
+```
+
+**XML:**
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+  <ProductID>
+    <ProductID1>4</ProductID1>
+    <ProductID2>8</ProductID2>
+    <ProductID3>15</ProductID3>
+    <ProductID4>16</ProductID4>
+    <ProductID5>23</ProductID5>
+  </ProductID>
+</root>
+```
+

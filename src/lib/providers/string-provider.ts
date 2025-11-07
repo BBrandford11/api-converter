@@ -62,8 +62,8 @@ export class StringProvider extends BaseProvider {
 
       const parts = trimmedSegment
         .split(`*`)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
 
       if (parts.length < 2) {
         continue;
@@ -93,8 +93,8 @@ export class StringProvider extends BaseProvider {
       const trimmedSegment = segment.trim();
       const parts = trimmedSegment
         .split(`*`)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
       if (parts.length < 2) {
         continue;
       }

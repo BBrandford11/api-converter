@@ -29,15 +29,7 @@ export class JsonProvider extends BaseProvider {
       }
 
       for (const segmentObject of segmentArray) {
-        const keys = Object.keys(segmentObject)
-          .filter((key) => key.startsWith(segmentName))
-          .sort((a, b) => {
-            const numA = parseInt(a.replace(segmentName, ""), 10);
-            const numB = parseInt(b.replace(segmentName, ""), 10);
-            return numA - numB;
-          });
-
-        const values = keys.map((key) => segmentObject[key]);
+        const values = Object.keys(segmentObject).map((key) => segmentObject[key]);
         const segmentString = `${segmentName}*${values.join("*")}~`;
         segments.push(segmentString);
       }

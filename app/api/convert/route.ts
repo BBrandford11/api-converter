@@ -19,6 +19,21 @@ function getProvider(fromFormat: ConversionType): BaseProvider | undefined {
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
+
+  if (!body.document || typeof body.document !== 'string') {
+  return NextResponse.json(
+    { error: "Missing or invalid 'document' field" },
+    { status: 400 }
+  );
+}
+
+if (!body.fromFormat || !body.toFormat ) {
+  return NextResponse.json(
+    { error: "Missing or Invalid fromFormat/toFormat" },
+    { status: 400 }
+  );
+}
+
   try {
     const provider = getProvider(body.fromFormat);
 
